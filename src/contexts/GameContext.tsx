@@ -43,7 +43,7 @@ const initialState: GameState = {
   resources: { money: 500, population: 0, materials: 200 },
   buildings: [],
   selectedBuildingType: null,
-  gridSize: { width: 20, height: 20 },
+  gridSize: { width: 12, height: 12 }, // Reduced to 12x12 for better initial playability and visibility
   isDay: true,
   achievements: achievements.map(a => ({ ...a, unlocked: false })),
   score: 0,

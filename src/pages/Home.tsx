@@ -11,14 +11,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGame } from '@/contexts/GameContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { HelpCircle, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { HelpCircle, X, PlayCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Home: React.FC = () => {
   const { state, dispatch } = useGame();
   const [cityName, setCityName] = React.useState(state.cityName);
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0); // 0 = not started, 1-5 steps
+  const [isTutorialActive, setIsTutorialActive] = useState(true); // Auto-start tutorial
+  const steps = [
+    { title: "Welcome! Name Your City", icon: "🏙️", description: "Enter a name for your growing metropolis. This shows in your resources!", complete: false },
+    { title: "Pick Your First Building", icon: "🏗️", description: "Click 'Basic House' in the right menu. It's cheap and adds people to your city!", complete: false },
+    { title: "Build on the Grid", icon: "🟩", description: "With house selected, hover the green tiles (your land). Click an empty one to place it! See the blue preview?", complete: false },
+    { title: "Watch Resources Grow", icon: "💰", description: "Wait 5 seconds – your house will add population! Check the top-right panel. Buildings work automatically.", complete: false },
+    { title: "You're Building! 🎉", icon: "🏆", description: "Great job! Now explore: Upgrade buildings, unlock achievements, or check leaderboards. Click 'Next' for more tips.", complete: false }
+  ];
 
   useEffect(() => {
     setCityName(state.cityName);
@@ -31,15 +39,79 @@ const Home: React.FC = () => {
   const saveName = () => {
     if (cityName.trim()) {
       dispatch({ type: 'SET_CITY_NAME', name: cityName.trim() });
-      toast.success(`City renamed to "${cityName.trim()}"!`);
+      toast.success(`Welcome to ${cityName.trim()}! Let's build!`);
+      if (tutorialStep === 0) setTutorialStep(1); // Advance tutorial
     } else {
-      toast.error('City name cannot be empty!');
+      toast.error('Give your city a cool name first!');
     }
   };
 
-  const closeGuide = () => {
-    setIsGuideOpen(false);
+  const completeStep = (step: number) => {
+    steps[step].complete = true;
+    setTutorialStep(step + 1);
+    toast.success(`Step ${step + 1} complete! 👏`);
+    if (step + 1 >= steps.length) {
+      setIsTutorialActive(false);
+      toast(`Tutorial done! Your city is ready. Build away! 🚀`);
+    }
   };
+
+  // Simulate step completion based on game state (e.g., first building placed)
+  useEffect(() => {
+    if (state.totalBuildingsPlaced >= 1 && tutorialStep < 3) {
+      completeStep(2);
+    }
+  }, [state.totalBuildingsPlaced]);
+
+  const skipTutorial = () => {
+    setIsTutorialActive(false);
+    setTutorialStep(steps.length);
+  };
+
+  if (isTutorialActive && tutorialStep < steps.length) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-green-50">
+        <Header />
+        <main className="container max-w-6xl mx-auto px-4 py-8">
+          <Card className="max-w-4xl mx-auto">
+            <CardContent className="p-8 text-center">
+              <PlayCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
+              <DialogTitle className="text-3xl font-bold mb-4">{steps[tutorialStep].title}</DialogTitle>
+              <p className="text-lg text-gray-700 mb-6">{steps[tutorialStep].description}</p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                {tutorialStep === 0 && (
+                  <Input
+                    value={cityName}
+                    onChange={handleNameChange}
+                    placeholder="e.g., Neo-City"
+                    className="max-w-sm"
+                  />
+                )}
+                <Button size="lg" onClick={tutorialStep === 0 ? saveName : () => completeStep(tutorialStep)} className="flex items-center space-x-2">
+                  {tutorialStep === 0 ? 'Save & Next' : 'Got It! Next'}
+                </Button>
+                <Button variant="ghost" onClick={skipTutorial} size="sm">
+                  Skip Tutorial
+                </Button>
+              </div>
+              {tutorialStep > 0 && (
+                <div className="mt-6 text-sm text-gray-500">
+                  Progress: {tutorialStep + 1} / {steps.length} steps
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          {/* Show game partially during tutorial */}
+          {tutorialStep >= 1 && (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-8 opacity-50">
+              <div className="lg:col-span-3"><GameBoard /></div>
+              <div className="space-y-6"><ResourceDisplay /><BuildingMenu /></div>
+            </div>
+          )}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
@@ -61,75 +133,20 @@ const Home: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Enhanced Guide Button */}
-        <Card className="flex items-center justify-between p-6">
-          <div className="flex items-center space-x-2">
-            <HelpCircle className="h-5 w-5 text-blue-600" />
-            <span className="font-medium">Need help? Click for a complete guide!</span>
-          </div>
-          <Dialog open={isGuideOpen} onOpenChange={setIsGuideOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">Open Guide</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="flex items-center justify-between">
-                  <span>🏙️ City Builder Guide - How to Play</span>
-                  <Button variant="ghost" size="sm" onClick={closeGuide}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-6 text-sm leading-relaxed">
-                <div>
-                  <h3 className="font-bold text-lg mb-2">1. Getting Started</h3>
-                  <ul className="space-y-2 list-disc list-inside text-gray-700">
-                    <li><strong>Resources:</strong> You start with $500 money and 200 materials. Watch the top-right panel for your current resources (👥 Population, 💰 Money, 🛠️ Materials).</li>
-                    <li><strong>City Name:</strong> Enter and save a name for your city in the input above. It shows in your resources display!</li>
-                    <li><strong>Grid:</strong> The large area in the center is your 20x20 city grid. Each white square (tile) is a buildable spot. Coordinates like (0,0) are shown in the bottom-right of empty tiles.</li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg mb-2">2. Building Your City</h3>
-                  <ul className="space-y-2 list-disc list-inside text-gray-700">
-                    <li><strong>Select a Building:</strong> On the right sidebar, click any building in the "Building Menu" (e.g., 🏠 Basic House). It shows cost (💰 Money + 🛠️ Materials) and what it produces.</li>
-                    <li><strong>Preview & Place:</strong> Hover over the grid to see a blue preview. Click an empty white tile to place it. If you can't afford it, a toast message will explain why.</li>
-                    <li><strong>Visual Feedback:</strong> Placed buildings turn green with their icon (e.g., 🏠). You can't place on occupied tiles.</li>
-                    <li><strong>Tip:</strong> Start with cheap buildings like Basic House (🏠) to grow population, then add shops (🏪) for money.</li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg mb-2">3. Managing Resources</h3>
-                  <ul className="space-y-2 list-disc list-inside text-gray-700">
-                    <li><strong>Production:</strong> Every 5 seconds, your buildings automatically produce resources (e.g., houses add population, shops add money). A toast notification confirms each cycle!</li>
-                    <li><strong>Upgrades:</strong> Below the grid, see your buildings in "Upgrades". Click "Upgrade" if you have enough money – it boosts production (e.g., x1.5 or x2 multiplier). Max level 2.</li>
-                    <li><strong>Totals:</strong> The resources panel shows lifetime totals (e.g., Total Money Earned) for achievements.</li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg mb-2">4. Day/Night & Achievements</h3>
-                  <ul className="space-y-2 list-disc list-inside text-gray-700">
-                    <li><strong>Day/Night Cycle:</strong> Every 30 seconds, the grid changes color (Day: light/blue-green, Night: dark/purple-blue). It doesn't affect gameplay but adds atmosphere!</li>
-                    <li><strong>Achievements:</strong> Unlock milestones automatically (e.g., "First Settlement" for your first building). They give bonus resources and boost your score. Check the Achievements page.</li>
-                    <li><strong>Score:</strong> Earn points from buildings, upgrades, and achievements. Higher score = better leaderboard rank!</li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg mb-2">5. Navigation & More</h3>
-                  <ul className="space-y-2 list-disc list-inside text-gray-700">
-                    <li><strong>Pages:</strong> Use the top navigation: Leaderboards (see top cities), Achievements (track progress), Upgrades (manage buildings).</li>
-                    <li><strong>Saving:</strong> Your progress auto-saves to browser storage. Refresh to continue where you left off!</li>
-                    <li><strong>Tips for Success:</strong> Balance residential (population) → commercial (money) → industrial (materials). Build parks (🌳) for happiness bonuses. Avoid running out of power (⚡)!</li>
-                    <li><strong>Grid View Fixed:</strong> Tiles are now larger (20x20px) with borders, subtle grid lines, and hover previews. Scroll if needed. No more 'one color box' – each tile is individual!</li>
-                  </ul>
-                </div>
-                <div className="pt-4 border-t text-center text-blue-600">
-                  <p>Build your dream city! If stuck, check toasts for feedback or reopen this guide. 🎮</p>
-                </div>
+        {/* Tutorial Complete Banner */}
+        {!isTutorialActive && (
+          <Card className="bg-green-50 border-green-200">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <span className="font-medium text-green-800">Tutorial Complete! Your city is ready to grow. 🌆</span>
               </div>
-            </DialogContent>
-          </Dialog>
-        </Card>
+              <Button variant="outline" size="sm" onClick={() => setIsTutorialActive(true)}>
+                Review Guide
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Main Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
