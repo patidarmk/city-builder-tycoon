@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useGame } from '@/contexts/GameContext';
+import { buildingTypes } from '@/data/buildings';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -90,7 +91,7 @@ const GameBoard: React.FC = () => {
             const x = i % gridSize.width;
             const y = Math.floor(i / gridSize.width);
             const key = `${x}-${y}`;
-            const isHovered = hoveredTile && hoveredTile.x === x && hoveredTile.y === y;
+            const isHovered = hoveredTile !== null && hoveredTile.x === x && hoveredTile.y === y;
             return (
               <div
                 key={key}
