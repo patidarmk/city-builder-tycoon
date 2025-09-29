@@ -1,14 +1,16 @@
 "use client";
 
 import * as React from 'react';
-import { Link, useRouter } from '@tanstack/react-router';
+import { Link, useLocation } from '@tanstack/react-router';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Menu, Home, Trophy, Star, Settings } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const Header: React.FC = () => {
-  const router = useRouter();
+  const location = useLocation();
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-xl border-b border-gray-200/50 shadow-lg">
@@ -24,28 +26,28 @@ const Header: React.FC = () => {
         <nav className="hidden md:flex items-center space-x-6">
           <Link to="/" className={cn(
             "flex items-center space-x-2 text-sm font-medium transition-colors hover:text-blue-600",
-            router.state.matches.some(m => m.route.path === '/') ? 'text-blue-600' : 'text-gray-700'
+            isActive('/') ? 'text-blue-600' : 'text-gray-700'
           )}>
             <Home className="h-4 w-4" />
             <span>Home</span>
           </Link>
           <Link to="/leaderboards" className={cn(
             "flex items-center space-x-2 text-sm font-medium transition-colors hover:text-blue-600",
-            router.state.matches.some(m => m.route.path === '/leaderboards') ? 'text-blue-600' : 'text-gray-700'
+            isActive('/leaderboards') ? 'text-blue-600' : 'text-gray-700'
           )}>
             <Trophy className="h-4 w-4" />
             <span>Leaderboards</span>
           </Link>
           <Link to="/achievements" className={cn(
             "flex items-center space-x-2 text-sm font-medium transition-colors hover:text-blue-600",
-            router.state.matches.some(m => m.route.path === '/achievements') ? 'text-blue-600' : 'text-gray-700'
+            isActive('/achievements') ? 'text-blue-600' : 'text-gray-700'
           )}>
             <Star className="h-4 w-4" />
             <span>Achievements</span>
           </Link>
           <Link to="/upgrades" className={cn(
             "flex items-center space-x-2 text-sm font-medium transition-colors hover:text-blue-600",
-            router.state.matches.some(m => m.route.path === '/upgrades') ? 'text-blue-600' : 'text-gray-700'
+            isActive('/upgrades') ? 'text-blue-600' : 'text-gray-700'
           )}>
             <Settings className="h-4 w-4" />
             <span>Upgrades</span>

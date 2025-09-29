@@ -12,39 +12,6 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-
-const LeaderboardTable: React.FC = () => {
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Rank</TableHead>
-          <TableHead>Player</TableHead>
-          <TableHead>City</TableHead>
-          <TableHead>Population</TableHead>
-          <TableHead>Size</TableHead>
-          <TableHead>Score</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {leaderboardData.map(entry => (
-          <TableRow key={entry.id}>
-            <TableCell className="font-medium">{entry.rank}</TableCell>
-            <Table<applaa-write path="src/components/LeaderboardTable.tsx" description="Table displaying leaderboard data using shadcn/ui Table.">
-"use client";
-
-import React from 'react';
-import { leaderboardData } from '@/data/leaderboards';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 const LeaderboardTable: React.FC = () => {

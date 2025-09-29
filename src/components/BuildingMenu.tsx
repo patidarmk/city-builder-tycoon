@@ -6,6 +6,7 @@ import { buildingTypes } from '@/data/buildings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const BuildingMenu: React.FC = () => {
   const { state, dispatch } = useGame();

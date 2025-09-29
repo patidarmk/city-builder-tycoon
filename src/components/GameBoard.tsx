@@ -5,6 +5,7 @@ import { useGame } from '@/contexts/GameContext';
 import { buildingTypes } from '@/data/buildings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface TileProps {
   x: number;

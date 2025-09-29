@@ -4,7 +4,7 @@ export interface Achievement {
   description: string;
   condition: string;
   icon: string;
-  reward: { money?: number; materials?: number };
+  reward: { money?: number; materials?: number; population?: number };
   unlocked: boolean;
 }
 
