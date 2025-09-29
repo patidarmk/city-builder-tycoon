@@ -76,7 +76,7 @@ const Home: React.FC = () => {
           <Card className="max-w-4xl mx-auto">
             <CardContent className="p-8 text-center">
               <PlayCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
-              <DialogTitle className="text-3xl font-bold mb-4">{steps[tutorialStep].title}</DialogTitle>
+              <h2 className="text-3xl font-bold mb-4">{steps[tutorialStep].title}</h2>
               <p className="text-lg text-gray-700 mb-6">{steps[tutorialStep].description}</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 {tutorialStep === 0 && (
